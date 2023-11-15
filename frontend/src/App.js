@@ -5,15 +5,21 @@ import "./app.css";
 import { Star, Room } from "@material-ui/icons";
 import { format } from "timeago.js";
 import { Popup, Marker } from "react-map-gl";
+import Register from "./components/Register";
+import Login from "./components/Login";
+
 
 function App() {
-  const currentUser = "gosia";
+  const [currentUser, setCurrentUser] = useState(null);
   const [pins, setPins] = useState([]);
   const [newPlace, setNewPlace] = useState(null);
   const [selectedPointId, setSelectedPointId] = useState(null);
   const [title, setTitle] = useState(null);
   const [desc, setDesc] = useState(null);
   const [rating, setRating] = useState(0);
+  const [showRegister, setShowRegister] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
+
 
   useEffect(() => {
     const getPins = async () => {
@@ -66,36 +72,38 @@ function App() {
       rating,
       desc,
       title,
-    }
-    console.log("Log a new pin details" +newPin)
+    };
+    console.log("Log a new pin details" + newPin);
     try {
       const response = await fetch("http://localhost:8802/api/pins", {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': "*"
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify(newPin),
       });
-  
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-  
+
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+
       const data = await response.json();
-  
+
       setPins([...pins, data]);
       setNewPlace(null);
-    } catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
-  }
+  };
 
+
+ const handleLogout = () => {
+  setCurrentUser(null);
+ }
+  
 
   return (
     <div className="App">
-          <button className="button logout">Log out</button>
-          <button className="button login">Login</button>
-          <button className="button register">Register</button>
-          
       <Map
         key={Math.random}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX}
@@ -145,7 +153,7 @@ function App() {
                   onChange={(e) => setDesc(e.target.value)}
                 />
                 <label>Rating</label>
-                <select onChange={(e)=>setRating(e.target.value)}>
+                <select onChange={(e) => setRating(e.target.value)}>
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -176,8 +184,7 @@ function App() {
               <p className="desc">{selectedPin.desc}</p>
               <label>Rating</label>
               <div className="stars">
-                  {Array(selectedPin.rating).fill(<Star className="star" />)}
-                
+                {Array(selectedPin.rating).fill(<Star className="star" />)}
               </div>
               <label>Information</label>
               <span className="username">
@@ -188,72 +195,21 @@ function App() {
           </Popup>
         )}
 
+        {showRegister && <Register setShowRegister={setShowRegister}/>}
+        {showLogin && <Login setShowLogin={setShowLogin} setCurrentUser={setCurrentUser}/>}
 
+
+        {currentUser ? (
+          <button className="button logout" onClick={()=>handleLogout()}>Log out</button>
+        ) : (
+          <div className="buttons">
+            <button className="button login" onClick={()=>setShowLogin(true)}>Login</button>
+            <button className="button register" onClick={()=>setShowRegister(true)}>Register</button>
+          </div>
+        )}
       </Map>
     </div>
   );
 }
 
 export default App;
-
-// longitude={selectedPin.long}
-// latitude={selectedPin.lat}
-// {pins.map(p => (
-// <>
-//   <Marker
-//     key={Math.Random}
-//     longitude={p.long}
-//     latitude={p.lat}
-//     offsetLeft={-20}
-//     offsetTop={-10}
-//   >
-//     <Room
-//     key={Math.Random}
-//     style={{ color: "slateblue", cursor: "pointer" }}
-//     onClick={()=>handleMarkerClick(p._id)}
-//     />
-//   </Marker>
-
-// {p._id === currentPlaceId && (<Popup
-//     key={Math.Random}
-//     longitude={p.long}
-//     latitude={p.lat}
-//       anchor="left"
-//       onClose={() => setCurrentPlaceId(null)}>
-//       <div className="card">
-//         <label>Place</label>
-//         <h4 className="place">{p.title}</h4>
-//         <label>Review</label>
-//         <p className="desc">{p.desc}</p>
-//         <label>Rating</label>
-//         <div className="stars">
-//           <Star className='star' />
-//           <Star className='star' />
-//           <Star className='star' />
-//           <Star className='star' />
-//           <Star className='star' />
-//         </div>
-//         <label>Information</label>
-//         <span className="username">Created by <b>{p.username}</b></span>
-//         <span className="date">{format(p.createdAt)}</span>
-
-//       </div>
-//     </Popup>) }
-
-// </>
-
-// )
-// )}
-
-// <Points
-//   longitude={p.long}
-//   latitude={p.lat}
-//   id={p._id}
-//   title={p.title}
-//   desc={p.desc}
-//   username={p.username}
-//   createdAt={p.createdAt}
-//   onClick={handlePointClick}
-// />
-
-//onClose={() => setShowPopup(false)}
