@@ -6,12 +6,14 @@ import { Star, Room } from "@material-ui/icons";
 import { format } from "timeago.js";
 import { Popup, Marker } from "react-map-gl";
 
-
 function App() {
   const currentUser = "gosia";
   const [pins, setPins] = useState([]);
   const [newPlace, setNewPlace] = useState(null);
   const [selectedPointId, setSelectedPointId] = useState(null);
+  const [title, setTitle] = useState(null);
+  const [desc, setDesc] = useState(null);
+  const [rating, setRating] = useState(0);
 
   useEffect(() => {
     const getPins = async () => {
@@ -55,8 +57,45 @@ function App() {
   let selectedPin = pins.find((pin) => pin._id === selectedPointId);
   console.log("selected pin ----", selectedPin);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newPin = {
+      username: currentUser,
+      long: newPlace.newLong,
+      lat: newPlace.newLat,
+      rating,
+      desc,
+      title,
+    }
+    console.log("Log a new pin details" +newPin)
+    try {
+      const response = await fetch("http://localhost:8802/api/pins", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': "*"
+        },
+        body: JSON.stringify(newPin),
+      });
+  
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+  
+      const data = await response.json();
+  
+      setPins([...pins, data]);
+      setNewPlace(null);
+    } catch(err){
+      console.log(err)
+    }
+  }
+
+
   return (
     <div className="App">
+          <button className="button logout">Log out</button>
+          <button className="button login">Login</button>
+          <button className="button register">Register</button>
+          
       <Map
         key={Math.random}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX}
@@ -69,16 +108,19 @@ function App() {
         style={{ width: "100vw", height: "100vw" }}
         onDblClick={handleAddClick}
       >
-        {pins.map((p) => ( <Marker
+        {pins.map((p) => (
+          <Marker
             longitude={p.long}
             latitude={p.lat}
             offsetLeft={-20}
             offsetTop={-10}
           >
             <Room
-              style={{ color: p.username === currentUser ? "tomato" : "slateblue", cursor: "pointer" }}
-              onClick={()=>handleMarkerClick(p._id)}
-
+              style={{
+                color: p.username === currentUser ? "tomato" : "slateblue",
+                cursor: "pointer",
+              }}
+              onClick={() => handleMarkerClick(p._id)}
             />
           </Marker>
         ))}
@@ -91,28 +133,36 @@ function App() {
             onClose={() => setNewPlace(null)}
           >
             <div>
-            <form>
-              <label>Title</label>
-              <input placeholder="Enter a title"/>
-              <label>Review</label>
-              <textarea placeholder="Say something about this place" />
-              <label>Rating</label>
-              <select>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              </select>
-              <button className="submitButton" type="submit">Add  Pin</button>
-            </form>
+              <form onSubmit={handleSubmit}>
+                <label>Title</label>
+                <input
+                  placeholder="Enter a title"
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <label>Review</label>
+                <textarea
+                  placeholder="Say something about this place"
+                  onChange={(e) => setDesc(e.target.value)}
+                />
+                <label>Rating</label>
+                <select onChange={(e)=>setRating(e.target.value)}>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+                <button className="submitButton" type="submit">
+                  Add Pin
+                </button>
+              </form>
             </div>
-            </Popup>
+          </Popup>
         )}
 
         {selectedPointId && (
           <Popup
-          closeOnClick={false}
+            closeOnClick={false}
             onClose={() => setSelectedPointId(null)}
             longitude={selectedPin.long}
             latitude={selectedPin.lat}
@@ -126,11 +176,8 @@ function App() {
               <p className="desc">{selectedPin.desc}</p>
               <label>Rating</label>
               <div className="stars">
-                <Star className="star" />
-                <Star className="star" />
-                <Star className="star" />
-                <Star className="star" />
-                <Star className="star" />
+                  {Array(selectedPin.rating).fill(<Star className="star" />)}
+                
               </div>
               <label>Information</label>
               <span className="username">
@@ -140,6 +187,8 @@ function App() {
             </div>
           </Popup>
         )}
+
+
       </Map>
     </div>
   );
@@ -196,16 +245,15 @@ export default App;
 // )
 // )}
 
+// <Points
+//   longitude={p.long}
+//   latitude={p.lat}
+//   id={p._id}
+//   title={p.title}
+//   desc={p.desc}
+//   username={p.username}
+//   createdAt={p.createdAt}
+//   onClick={handlePointClick}
+// />
 
-          // <Points
-          //   longitude={p.long}
-          //   latitude={p.lat}
-          //   id={p._id}
-          //   title={p.title}
-          //   desc={p.desc}
-          //   username={p.username}
-          //   createdAt={p.createdAt}
-          //   onClick={handlePointClick}
-          // />
-
-          //onClose={() => setShowPopup(false)}
+//onClose={() => setShowPopup(false)}
