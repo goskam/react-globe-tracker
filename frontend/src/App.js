@@ -41,18 +41,22 @@ function App() {
   }, []);
 
   const handleAddClick = (e) => {
+    console.log("current user is: " + currentUser)
     console.log("double click event = ", e);
 
     let newLat = e.lngLat.lat;
     let newLong = e.lngLat.lng;
 
+    if (currentUser){
+      setNewPlace({
+        newLong,
+        newLat,
+      });
+    }
+
     console.log("new lat ----- " + newLat);
     console.log("new long ----- " + newLong);
 
-    setNewPlace({
-      newLong,
-      newLat,
-    });
   };
 
   const handleMarkerClick = (id) => {
