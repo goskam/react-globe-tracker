@@ -101,19 +101,19 @@ function App() {
   setCurrentUser(null);
  }
   
+//        mapStyle="mapbox://styles/mapbox/light-v11"
 
   return (
     <div className="App">
       <Map
-        key={Math.random}
         mapboxAccessToken={process.env.REACT_APP_MAPBOX}
         initialViewState={{
-          longitude: 15,
-          latitude: 45,
+          longitude: 16,
+          latitude: 48,
           zoom: 4,
         }}
         mapStyle="mapbox://styles/mapbox/light-v11"
-        style={{ width: "100vw", height: "100vw" }}
+        style={{ width: "100vw", height: "50vw" }}
         onDblClick={handleAddClick}
       >
         {pins.map((p) => (
