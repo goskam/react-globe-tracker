@@ -4,8 +4,8 @@ import Map from "react-map-gl";
 import { Star, Room } from "@material-ui/icons";
 import { format } from "timeago.js";
 import { Popup, Marker } from "react-map-gl";
-import Register from "./Register";
-import Login from "./Login";
+import Register from "./Authentication/Register";
+import Login from "./Authentication/Login";
 
 
 function RenderMap() {
