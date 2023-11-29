@@ -6,15 +6,15 @@ import { format } from "timeago.js";
 import { Popup, Marker } from "react-map-gl";
 import Register from "./Authentication/Register";
 import Login from "./Authentication/Login";
+import NewPlacePopup from "./Popup/NewPlacePopup";
+
 
 function RenderMap() {
   const [currentUser, setCurrentUser] = useState(null);
   const [pins, setPins] = useState([]);
   const [newPlace, setNewPlace] = useState(null);
   const [selectedPointId, setSelectedPointId] = useState(null);
-  const [title, setTitle] = useState(null);
-  const [desc, setDesc] = useState(null);
-  const [rating, setRating] = useState(0);
+
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
@@ -65,8 +65,8 @@ function RenderMap() {
 
     if (currentUser) {
       setNewPlace({
-        newLong,
-        newLat,
+        latitude: newLat,
+        longitude: newLong,
       });
     }
 
@@ -76,17 +76,18 @@ function RenderMap() {
 
   //adding new place - submitting new place details
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newPin = {
+  const handleNewPopupSubmit = async (newPin) => {
+  
+    const pin = {
       username: currentUser,
-      long: newPlace.newLong,
-      lat: newPlace.newLat,
-      rating,
-      desc,
-      title,
+      long: newPin.longitude,
+      lat: newPin.latitude,
+      rating: newPin.rating,
+      desc: newPin.desc,
+      title: newPin.title,
     };
-    console.log("Log a new pin details" + newPin);
+
+    console.log("Log a new pin details" + pin);
     try {
       const response = await fetch("http://localhost:8802/api/pins", {
         method: "POST",
@@ -94,7 +95,7 @@ function RenderMap() {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-        body: JSON.stringify(newPin),
+        body: JSON.stringify(pin),
       });
 
       if (!response.ok)
@@ -115,6 +116,9 @@ function RenderMap() {
     setCurrentUser(null);
   };
 
+
+
+
   return (
     <Map
       mapboxAccessToken={process.env.REACT_APP_MAPBOX}
@@ -127,6 +131,7 @@ function RenderMap() {
       style={{ width: "100vw", height: "50vw" }}
       onDblClick={handleAddClick}
     >
+
       {pins.map((p) => (
         <Marker
           longitude={p.long}
@@ -144,8 +149,9 @@ function RenderMap() {
         </Marker>
       ))}
 
-      {/* {newPlace && <NewPlacePopup placeDefinition={newPlace} />} */}
+       {newPlace && <NewPlacePopup latitude={newPlace.latitude} longitude={newPlace.longitude} onSubmit={handleNewPopupSubmit} onClose={()=>{setNewPlace(null)}}/>}
 
+{/* 
       {newPlace && (
         <Popup
           longitude={newPlace.newLong}
@@ -179,7 +185,7 @@ function RenderMap() {
             </form>
           </div>
         </Popup>
-      )}
+      )} */}
 
       {selectedPointId && (
         <Popup
